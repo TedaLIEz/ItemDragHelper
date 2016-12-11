@@ -1,8 +1,9 @@
 package com.hustunique.jianguo.photogallery.widget;
 
-import android.support.v4.animation.AnimatorCompatHelper;
+import android.animation.ObjectAnimator;
+import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.support.v4.animation.AnimatorListenerCompat;
-import android.support.v4.animation.AnimatorUpdateListenerCompat;
 import android.support.v4.animation.ValueAnimatorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
@@ -13,9 +14,12 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.ImageView;
 
 import com.almeros.android.multitouch.MoveGestureDetector;
 import com.almeros.android.multitouch.RotateGestureDetector;
+import com.hustunique.jianguo.photogallery.evaluators.MatrixEvaluator;
+import com.hustunique.jianguo.photogallery.model.Layer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +48,8 @@ public class ItemDragHelper {
     private float mInitialTouchY;
     private int mSelectedStartX;
     private int mSelectedStartY;
+
+    private Layer mLayer;
     /**
      * Animation for recovery if we fail to open it.
      */
@@ -64,8 +70,8 @@ public class ItemDragHelper {
         @Override
         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
             mScaleGestureDetector.onTouchEvent(e);
-            mRotateGestureDetector.onTouchEvent(e);
-            mMoveGestureDetector.onTouchEvent(e);
+//            mRotateGestureDetector.onTouchEvent(e);
+//            mMoveGestureDetector.onTouchEvent(e);
             final int action = MotionEventCompat.getActionMasked(e);
             if (action == MotionEvent.ACTION_DOWN) {
                 mActivePointerId = e.getPointerId(0);
@@ -76,8 +82,7 @@ public class ItemDragHelper {
                     if (animation != null) {
                         mInitialTouchX -= animation.mX;
                         mInitialTouchY -= animation.mY;
-                        endRecoverAnimation(animation.mViewHolder, true);
-                        select(animation.mViewHolder, animation.mActionState);
+//                        select(animation.mViewHolder, animation.mActionState);
                         updateDxDy(e, 0);
                     }
                 }
@@ -91,8 +96,8 @@ public class ItemDragHelper {
         @Override
         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
             mScaleGestureDetector.onTouchEvent(e);
-            mRotateGestureDetector.onTouchEvent(e);
-            mMoveGestureDetector.onTouchEvent(e);
+//            mRotateGestureDetector.onTouchEvent(e);
+//            mMoveGestureDetector.onTouchEvent(e);
             if (mActivePointerId == ACTIVE_POINTER_ID_NONE) return;
             final int action = MotionEventCompat.getActionMasked(e);
             final int activePointerIndex = e.findPointerIndex(mActivePointerId);
@@ -105,6 +110,7 @@ public class ItemDragHelper {
                         // TODO: move viewHolder in this case.
                         Log.d(TAG, "action_move startX " + mInitialTouchX + " startY " + mInitialTouchY
                                 + " mDx " + mDx + " mDy " + mDy);
+
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
@@ -134,7 +140,6 @@ public class ItemDragHelper {
     private int mActionState;
 
 
-
     public void attachToRecyclerView(RecyclerView rv) {
         if (mRecyclerView == rv) {
             return;
@@ -150,9 +155,10 @@ public class ItemDragHelper {
             return;
         }
         final int prevActionState = mActionState;
-        endRecoverAnimation(selected, true);
+//        endRecoverAnimation(selected, true);
         mActionState = actionState;
         if (mSelected != null) {
+            // TODO: play the restore animation.
             final RecyclerView.ViewHolder prevSelected = mSelected;
             final float targetTranslateX = 0, targetTranslateY = 0;
             int animationType;
@@ -168,26 +174,25 @@ public class ItemDragHelper {
             final float currentTranslateX = mTmpPosition[0];
             final float currentTranslateY = mTmpPosition[1];
 
-            final RecoverAnimation rv = new RecoverAnimation(prevSelected, animationType, prevActionState,
-                    currentTranslateX, currentTranslateY, targetTranslateX, targetTranslateY);
-            final long duration = getAnimationDuration(mRecyclerView, animationType, targetTranslateX - currentTranslateX, targetTranslateY - currentTranslateY);
-            rv.setDuration(duration);
-            mRecoverAnimations.add(rv);
-            rv.start();
+//            final RecoverAnimation rv = new RecoverAnimation(prevSelected, animationType, prevActionState,
+//                    currentTranslateX, currentTranslateY, targetTranslateX, targetTranslateY);
+//            final long duration = getAnimationDuration(mRecyclerView, animationType, targetTranslateX - currentTranslateX, targetTranslateY - currentTranslateY);
+//            rv.setDuration(duration);
+//            mRecoverAnimations.add(rv);
+//            rv.start();
             mSelected = null;
         }
         if (selected != null) {
             mSelectedStartX = selected.itemView.getLeft();
             mSelectedStartY = selected.itemView.getTop();
             mSelected = selected;
+            mLayer = new Layer(mSelected.itemView.getWidth(), mSelected.itemView.getHeight());
             final ViewParent rvParent = mRecyclerView.getParent();
             if (rvParent != null) {
                 rvParent.requestDisallowInterceptTouchEvent(mSelected != null);
             }
         }
     }
-
-
 
 
     private void initGestureDetector() {
@@ -211,9 +216,18 @@ public class ItemDragHelper {
         final float y = ev.getY(pointerIndex);
         mDx = x - mInitialTouchX;
         mDy = y - mInitialTouchY;
-
-
     }
+
+    private void playAnimation(Matrix from, Matrix to) {
+        if (mSelected != null) {
+            ObjectAnimator objectAnimator =
+                    ObjectAnimator.ofObject((ImageView) mSelected.itemView, "ImageMatrix",
+                            new MatrixEvaluator(), from, to);
+            objectAnimator.setDuration(0);
+            objectAnimator.start();
+        }
+    }
+
 
     private void getSelectedDxDy(float[] outPosition) {
         outPosition[0] = ViewCompat.getTranslationX(mSelected.itemView);
@@ -230,12 +244,11 @@ public class ItemDragHelper {
         }
     }
 
-    void endRecoverAnimation(RecyclerView.ViewHolder viewHolder, boolean override) {
+    void endRecoverAnimation(RecyclerView.ViewHolder viewHolder) {
         final int recoverAnimSize = mRecoverAnimations.size();
         for (int i = recoverAnimSize - 1; i >= 0; i--) {
             final RecoverAnimation anim = mRecoverAnimations.get(i);
             if (anim.mViewHolder == viewHolder) {
-                anim.mOverridden |= override;
                 if (!anim.mEnded) {
                     anim.cancel();
                 }
@@ -306,94 +319,48 @@ public class ItemDragHelper {
     }
 
 
-    // copy from source code in the ItemTouchHelper class
     private class RecoverAnimation implements AnimatorListenerCompat {
 
-        final float mStartDx;
+        final Matrix start;
+        final Matrix to;
 
-        final float mStartDy;
-
-        final float mTargetX;
-
-        final float mTargetY;
 
         final RecyclerView.ViewHolder mViewHolder;
-
-        final int mActionState;
-
-        private final ValueAnimatorCompat mValueAnimator;
-
-        final int mAnimationType;
-
-        public boolean mIsPendingCleanup;
-
+        private final ObjectAnimator mObjectAnimator;
         float mX;
+        float mFraction;
 
         float mY;
 
-        // if user starts touching a recovering view, we put it into interaction mode again,
-        // instantly.
-        boolean mOverridden = false;
-
         boolean mEnded = false;
 
-        private float mFraction;
-
-        public RecoverAnimation(RecyclerView.ViewHolder viewHolder, int animationType,
-                                int actionState, float startDx, float startDy, float targetX, float targetY) {
+        public RecoverAnimation(RecyclerView.ViewHolder viewHolder, int actionState, Matrix start, Matrix to) {
             mActionState = actionState;
-            mAnimationType = animationType;
             mViewHolder = viewHolder;
-            mStartDx = startDx;
-            mStartDy = startDy;
-            mTargetX = targetX;
-            mTargetY = targetY;
-            mValueAnimator = AnimatorCompatHelper.emptyValueAnimator();
-            mValueAnimator.addUpdateListener(
-                    new AnimatorUpdateListenerCompat() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimatorCompat animation) {
-                            setFraction(animation.getAnimatedFraction());
-                        }
-                    });
-            mValueAnimator.setTarget(viewHolder.itemView);
-            mValueAnimator.addListener(this);
-            setFraction(0f);
+            this.start = start;
+            this.to = to;
+            mObjectAnimator = ObjectAnimator.ofObject(mViewHolder.itemView,
+                    "imageMatrix", new MatrixEvaluator(), start, to);
+
         }
 
         public void setDuration(long duration) {
-            mValueAnimator.setDuration(duration);
+            mObjectAnimator.setDuration(duration);
         }
 
         public void start() {
             mViewHolder.setIsRecyclable(false);
-            mValueAnimator.start();
+            mObjectAnimator.start();
         }
 
         public void cancel() {
-            mValueAnimator.cancel();
+            mObjectAnimator.cancel();
         }
 
         public void setFraction(float fraction) {
             mFraction = fraction;
         }
 
-        /**
-         * We run updates on onDraw method but use the fraction from animator callback.
-         * This way, we can sync translate x/y values w/ the animators to avoid one-off frames.
-         */
-        public void update() {
-            if (mStartDx == mTargetX) {
-                mX = ViewCompat.getTranslationX(mViewHolder.itemView);
-            } else {
-                mX = mStartDx + mFraction * (mTargetX - mStartDx);
-            }
-            if (mStartDy == mTargetY) {
-                mY = ViewCompat.getTranslationY(mViewHolder.itemView);
-            } else {
-                mY = mStartDy + mFraction * (mTargetY - mStartDy);
-            }
-        }
 
         @Override
         public void onAnimationStart(ValueAnimatorCompat animation) {
@@ -422,25 +389,32 @@ public class ItemDragHelper {
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         private float mScaleFactor = 1.0f;
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (detector.isInProgress() && Float.compare(detector.getScaleFactor(), 1.0f) != 0) {
+            if (detector.isInProgress()) {
                 View child = findChildView(detector);
                 if (child != null) {
                     RecyclerView.ViewHolder vh = mRecyclerView.getChildViewHolder(child);
-                    if (vh != null) {
-                        if (vh == mSelected) {
-                            // we find the current selection,
-                            // so play the scale animation
-                            // TODO: migrate with the same matrix in the move, rotate animation
-                        } else {
+                    if (mSelected == null) {
+                        if (Float.compare(detector.getScaleFactor(), 1.0f) != 0) {
                             mInitialTouchX = vh.itemView.getX();
                             mInitialTouchY = vh.itemView.getY();
                             mDx = mDy = 0f;
-                            Log.d(TAG, "start scale initialtouchx " + mInitialTouchX
-                                    + " initialtouchY " + mInitialTouchY);
+                            Log.d(TAG, "start scale initialTouchX " + mInitialTouchX
+                                    + " initialTouchY " + mInitialTouchY);
                             select(vh, ACTION_STATE_DRAG);
                         }
+                    } else if (vh == mSelected) {
+                        float scaleFactorDiff = detector.getScaleFactor();
+                        // TODO: migrate with the same matrix in the move, rotate animation
+                        // TODO: add holy scale value
+                        Matrix start = ((ImageView) mSelected.itemView).getImageMatrix();
+                        mLayer.postScale(scaleFactorDiff - 1.0f);
+                        Matrix to = mLayer.getMatrix();
+                        playAnimation(start, to);
+                    } else {
+                        select(vh, ACTION_STATE_DRAG);
                     }
                 }
             }
@@ -448,13 +422,27 @@ public class ItemDragHelper {
         }
     }
 
+
     private class MoveListener extends MoveGestureDetector.SimpleOnMoveGestureListener {
         @Override
         public boolean onMove(MoveGestureDetector detector) {
-            if (mSelected != null) {
-                detector.getFocusDelta();
-            }
+//            handleTranslate(detector.getFocusDelta());
             return mSelected != null;
+        }
+    }
+
+    private void handleTranslate(PointF delta) {
+        if (mSelected != null) {
+            float deltaX = delta.x;
+            float deltaY = delta.y;
+            if (Float.compare(deltaX, 0.0f) != 0 || Float.compare(deltaY, 0.0f) != 0) {
+                Matrix from = mLayer.getMatrix();
+                float moveX = deltaX / mSelected.itemView.getWidth();
+                float moveY = deltaY / mSelected.itemView.getHeight();
+                mLayer.postTranslate(moveX, moveY);
+                Matrix to = mLayer.getMatrix();
+                playAnimation(from, to);
+            }
         }
     }
 
@@ -468,3 +456,4 @@ public class ItemDragHelper {
         }
     }
 }
+

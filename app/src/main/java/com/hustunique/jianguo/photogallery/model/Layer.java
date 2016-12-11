@@ -25,12 +25,14 @@ public class Layer {
     private float y;
 
     private boolean isFlipped;
+    private final int width, height;
 
-    public Layer() {
-
+    public Layer(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    private void reset() {
+    public void reset() {
         this.rotationInDegrees = 0.0F;
         this.scale = 1.0f;
         this.isFlipped = false;
@@ -112,21 +114,21 @@ public class Layer {
     }
 
     interface Limits {
-        float MIN_SCALE = 0.06F;
+        float MIN_SCALE = 0.5F;
         float MAX_SCALE = 4.0F;
         float INITIAL_ENTITY_SCALE = 0.4F;
     }
 
-    public static Matrix getMatrix(Layer layer) {
+    public Matrix getMatrix() {
         Matrix matrix = new Matrix();
-        float topLeftX = layer.getX();
-        float topLeftY = layer.getY();
-        float centerX = 0F;
-        float centerY = 0F;
-        float rotationInDegree = layer.getRotationInDegrees();
-        float scaleX = layer.getScale();
-        float scaleY = layer.getScale();
-        if (layer.isFlipped()) {
+        float topLeftX = getX() * width;
+        float topLeftY = getY() * height;
+        float centerX = topLeftX + width * 0.5F;
+        float centerY = topLeftY + height * 0.5F;
+        float rotationInDegree = getRotationInDegrees();
+        float scaleX = getScale();
+        float scaleY = getScale();
+        if (isFlipped()) {
             rotationInDegree *= -1.0F;
             scaleX *= -1.0F;
         }

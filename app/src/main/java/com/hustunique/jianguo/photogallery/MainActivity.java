@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
 import com.hustunique.jianguo.photogallery.adapter.GalleryAdapter;
+import com.hustunique.jianguo.photogallery.widget.ItemDragHelper;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(new GalleryAdapter(this));
+        ItemDragHelper dragItemListener = new ItemDragHelper();
+        dragItemListener.attachToRecyclerView(mRecyclerView);
     }
 
 }

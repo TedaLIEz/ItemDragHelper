@@ -14,11 +14,11 @@ import com.hustunique.jianguo.photogallery.R;
  */
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
-    private static final int IMAGES_SIZE = 20;
+    private static final int IMAGES_SIZE = 50;
     private Context mContext;
     private int[] imageIds = {R.drawable.book, R.drawable.bourne, R.drawable.cacw,
-            R.drawable.deadpool, R.drawable.doctor, R.drawable.dory, R.drawable.hours,
-            R.drawable.hunger, R.drawable.ipman3, R.drawable.squad};
+            R.drawable.doctor, R.drawable.dory, R.drawable.hours,
+            R.drawable.hunger, R.drawable.ipman3, R.drawable.squad, R.drawable.deadpool};
 
     public GalleryAdapter(Context context) {
         mContext = context;

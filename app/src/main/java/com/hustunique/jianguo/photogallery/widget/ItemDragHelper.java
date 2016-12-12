@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.almeros.android.multitouch.MoveGestureDetector;
@@ -26,7 +25,7 @@ import java.util.List;
  * DragHelper, much similar to the {@link ItemTouchHelper}, only support for {@link android.widget.ImageView}
  * currently
  */
-
+// FIXME: 12/13/16 ArrayIndexOutOfBoundsException when scrolls after dragging one pic
 public class ItemDragHelper {
     private static final String TAG = "ItemDragHelper";
     private static final int ACTION_STATE_IDLE = 0;
@@ -54,7 +53,6 @@ public class ItemDragHelper {
      * Animation for recovery if we fail to open it.
      */
     private List<RecoverAnimation> mRecoverAnimations = new ArrayList<>();
-    private final float[] mTmpPosition = new float[2];
     /**
      * diff between the last event and initial touch.
      */
@@ -107,7 +105,10 @@ public class ItemDragHelper {
 
         @Override
         public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-            // FIXME: 12/10/16 maybe conflict with other motionEvent
+            if (!disallowIntercept) {
+                return;
+            }
+            select(null, ACTION_STATE_IDLE);
         }
     };
     private int mActionState;
@@ -137,16 +138,12 @@ public class ItemDragHelper {
             addChildDrawingOrderCallback();
         }
         if (mSelected != null) {
-            // TODO: play the restore animation.
             final RecyclerView.ViewHolder prevSelected = mSelected;
-
-
             final RecoverAnimation rv = new RecoverAnimation(prevSelected, ACTION_STATE_ANIMATED,
                     mDx, mDy, mRotate, mScale);
             rv.setDuration(getAnimationDuration(mRecyclerView));
             mRecoverAnimations.add(rv);
             rv.start();
-            removeChildDrawingOrderCallbackIfNecessary(prevSelected.itemView);
             mSelected = null;
         }
         if (selected != null) {
@@ -155,10 +152,6 @@ public class ItemDragHelper {
             mInitialTouchX = selected.itemView.getX();
             mInitialTouchY = selected.itemView.getY();
             mSelected = selected;
-            final ViewParent rvParent = mRecyclerView.getParent();
-            if (rvParent != null) {
-                rvParent.requestDisallowInterceptTouchEvent(mSelected != null);
-            }
         }
         mRecyclerView.invalidate();
     }
@@ -208,8 +201,6 @@ public class ItemDragHelper {
     }
 
 
-
-
     private long getAnimationDuration(RecyclerView recyclerView) {
         final RecyclerView.ItemAnimator itemAnimator = recyclerView.getItemAnimator();
         if (itemAnimator == null) {
@@ -232,20 +223,6 @@ public class ItemDragHelper {
         }
     }
 
-    RecoverAnimation findAnimation(MotionEvent e) {
-        if (mRecoverAnimations.isEmpty()) {
-            return null;
-        }
-        View target = findChildView(e);
-        for (int i = mRecoverAnimations.size() - 1; i >= 0; i--) {
-            final RecoverAnimation recoverAnimation = mRecoverAnimations.get(i);
-            if (recoverAnimation.mViewHolder.itemView == target) {
-                return recoverAnimation;
-            }
-        }
-        return null;
-    }
-
     private static boolean hitTest(View child, float x, float y, float left, float top) {
         return x >= left &&
                 x <= left + child.getWidth() &&
@@ -257,26 +234,6 @@ public class ItemDragHelper {
     View findChildView(ScaleGestureDetector detector) {
         final float x = detector.getFocusX();
         final float y = detector.getFocusY();
-        if (mSelected != null) {
-            final View selectedView = mSelected.itemView;
-            if (hitTest(selectedView, x, y, mSelectedStartX + mDx, mSelectedStartY + mDy)) {
-                return selectedView;
-            }
-        }
-        for (int i = mRecoverAnimations.size() - 1; i >= 0; i--) {
-            final RecoverAnimation anim = mRecoverAnimations.get(i);
-            final View view = anim.mViewHolder.itemView;
-            if (hitTest(view, x, y, anim.mDx, anim.mDy)) {
-                return view;
-            }
-        }
-        return mRecyclerView.findChildViewUnder(x, y);
-    }
-
-    View findChildView(MotionEvent event) {
-        // first check elevated views, if none, then call RV
-        final float x = event.getX();
-        final float y = event.getY();
         if (mSelected != null) {
             final View selectedView = mSelected.itemView;
             if (hitTest(selectedView, x, y, mSelectedStartX + mDx, mSelectedStartY + mDy)) {
@@ -313,8 +270,8 @@ public class ItemDragHelper {
                     .translationXBy(-dx)
                     .translationYBy(-dy)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setListener(this)
-                    .scaleYBy(1.0f - scaleFactor);
+                    .scaleYBy(1.0f - scaleFactor)
+                    .setListener(this);
             this.mDx = dx;
             this.mDy = dy;
             this.degrees = degrees;
@@ -332,7 +289,6 @@ public class ItemDragHelper {
         void cancel() {
             mAnimator.cancel();
         }
-
 
         @Override
         public void onAnimationStart(View view) {

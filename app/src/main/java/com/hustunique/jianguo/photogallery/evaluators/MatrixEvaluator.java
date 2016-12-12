@@ -7,7 +7,7 @@ import android.graphics.Matrix;
  * Created by JianGuo on 12/11/16.
  * {@link TypeEvaluator} for {@link Matrix}
  */
-
+@Deprecated
 public class MatrixEvaluator implements TypeEvaluator<Matrix>{
 
     @Override

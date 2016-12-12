@@ -5,7 +5,7 @@ import android.view.animation.Interpolator;
 /**
  * Created by JianGuo on 12/11/16.
  */
-
+@Deprecated
 public class ReverseInterpolator implements Interpolator {
     @Override
     public float getInterpolation(float v) {

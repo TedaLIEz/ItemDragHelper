@@ -75,7 +75,7 @@ public class ItemDragHelper {
         @Override
         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
             mScaleGestureDetector.onTouchEvent(e);
-//            mRotateGestureDetector.onTouchEvent(e);
+            mRotateGestureDetector.onTouchEvent(e);
             mMoveGestureDetector.onTouchEvent(e);
             final int action = MotionEventCompat.getActionMasked(e);
 
@@ -89,7 +89,7 @@ public class ItemDragHelper {
         @Override
         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
             mScaleGestureDetector.onTouchEvent(e);
-//            mRotateGestureDetector.onTouchEvent(e);
+            mRotateGestureDetector.onTouchEvent(e);
             mMoveGestureDetector.onTouchEvent(e);
             final int action = MotionEventCompat.getActionMasked(e);
             RecyclerView.ViewHolder viewHolder = mSelected;
@@ -309,6 +309,7 @@ public class ItemDragHelper {
             mViewHolder = viewHolder;
             mActionState = actionState;
             mAnimator = ViewCompat.animate(viewHolder.itemView).scaleXBy(1.0f - scaleFactor)
+                    .rotationBy(-degrees)
                     .translationXBy(-dx)
                     .translationYBy(-dy)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
@@ -365,6 +366,7 @@ public class ItemDragHelper {
                             mInitialTouchY = vh.itemView.getY();
                             mScale = 1.0f;
                             mDx = mDy = 0f;
+                            mRotate = 0.0f;
                             Log.d(TAG, "start scale initialTouchX " + mInitialTouchX
                                     + " initialTouchY " + mInitialTouchY);
                             select(vh, ACTION_STATE_ANIMATED);
@@ -417,9 +419,21 @@ public class ItemDragHelper {
         @Override
         public boolean onRotate(RotateGestureDetector detector) {
             if (mSelected != null) {
-                detector.getRotationDegreesDelta();
+
+                handleRotate(detector.getRotationDegreesDelta());
             }
             return mSelected != null;
+        }
+    }
+
+    private void handleRotate(float degrees) {
+        if (mSelected != null) {
+            mRotate -= degrees;
+            ViewCompat.animate(mSelected.itemView)
+                    .rotation(mRotate)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setDuration(0)
+                    .start();
         }
     }
 }

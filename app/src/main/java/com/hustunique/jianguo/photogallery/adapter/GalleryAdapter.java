@@ -14,7 +14,7 @@ import com.hustunique.jianguo.photogallery.R;
  */
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
-    private static final int IMAGES_SIZE = 1;
+    private static final int IMAGES_SIZE = 8;
     private Context mContext;
     private int[] imageIds = {R.drawable.book, R.drawable.bourne, R.drawable.cacw,
             R.drawable.doctor, R.drawable.dory, R.drawable.hours,

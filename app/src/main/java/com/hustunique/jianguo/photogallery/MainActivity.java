@@ -23,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(new GalleryAdapter(this));
-        ItemDragHelper dragItemListener = new ItemDragHelper();
-        dragItemListener.attachToRecyclerView(mRecyclerView);
+        ItemDragHelper dragItemHelper = new ItemDragHelper();
+        dragItemHelper.attachToRecyclerView(mRecyclerView);
     }
 
 }

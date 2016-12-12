@@ -6,7 +6,7 @@ import android.support.annotation.FloatRange;
 /**
  * Created by JianGuo on 12/11/16.
  */
-
+@Deprecated
 public class Layer {
     /**
      * rotation relative to the view center

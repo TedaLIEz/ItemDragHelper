@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<com.hustunique.jianguo.photogallery.widget.SquareLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-<ImageView
-    android:id="@+id/thumbnail"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:src="@drawable/hours"
-    android:adjustViewBounds="true"
-    android:scaleType="matrix"
-    xmlns:android="http://schemas.android.com/apk/res/android"/>
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/hours"
+        android:adjustViewBounds="false"
+        android:scaleType="centerCrop"/>
+</com.hustunique.jianguo.photogallery.widget.SquareLayout>

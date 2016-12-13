@@ -25,13 +25,13 @@ import java.util.List;
  * DragHelper, much similar to the {@link ItemTouchHelper}, only support for {@link android.widget.ImageView}
  * currently
  */
-// FIXME: 12/13/16 ArrayIndexOutOfBoundsException when scrolls after dragging one pic
-public class ItemDragHelper {
+public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeListener {
     private static final String TAG = "ItemDragHelper";
     private static final int ACTION_STATE_IDLE = 0;
     private static final int ACTION_STATE_ANIMATED = 1;
     private static final long DEFAULT_ANIMATION_DURATION = 100;
     private static final float MIN_SCALE = 0.4f;
+    private static final float MAX_SCALE = 3f;
     RecyclerView.ViewHolder mSelected;
     private float mInitialTouchX;
     private float mInitialTouchY;
@@ -119,8 +119,9 @@ public class ItemDragHelper {
             return;
         }
         mRecyclerView = rv;
-        mRecyclerView.addOnItemTouchListener(mOnItemTouchListener);
         initGestureDetector();
+        mRecyclerView.addOnItemTouchListener(mOnItemTouchListener);
+        mRecyclerView.addOnChildAttachStateChangeListener(this);
     }
 
 
@@ -250,6 +251,27 @@ public class ItemDragHelper {
         return mRecyclerView.findChildViewUnder(x, y);
     }
 
+    @Override
+    public void onChildViewAttachedToWindow(View view) {
+
+    }
+
+    @Override
+    public void onChildViewDetachedFromWindow(View view) {
+        // we should remove the itemView callback
+        // after being detached.
+        removeChildDrawingOrderCallbackIfNecessary(view);
+        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(view);
+        if (holder == null) {
+            return;
+        }
+        if (mSelected != null && holder == mSelected) {
+            select(null, ACTION_STATE_IDLE);
+        } else {
+            endRecoverAnimation(holder); // this may push it into pending cleanup list.
+        }
+    }
+
 
     private class RecoverAnimation implements ViewPropertyAnimatorListener {
 
@@ -311,7 +333,6 @@ public class ItemDragHelper {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            // FIXME: 12/12/16 find a better way to select a dragged viewHolder
             if (detector.isInProgress()) {
                 View child = findChildView(detector);
                 if (child != null) {
@@ -328,6 +349,7 @@ public class ItemDragHelper {
                             select(vh, ACTION_STATE_ANIMATED);
                         }
                     } else {
+                        // TODO: 12/13/16 Show full image when scaleFactor big enough
                         float scaleFactorDiff = detector.getScaleFactor();
                         handleScale(scaleFactorDiff);
                     }
@@ -359,6 +381,7 @@ public class ItemDragHelper {
     }
 
     private void handleTranslate(PointF delta) {
+        // TODO: 12/13/16 Check boundary
         if (mSelected != null) {
             mDx += delta.x;
             mDy += delta.y;

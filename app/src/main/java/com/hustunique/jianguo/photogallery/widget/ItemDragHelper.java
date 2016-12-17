@@ -1,6 +1,7 @@
 package com.hustunique.jianguo.photogallery.widget;
 
 import android.graphics.PointF;
+import android.support.annotation.Nullable;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorCompat;
@@ -38,6 +39,7 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
     private int mSelectedStartX;
     private int mSelectedStartY;
 
+    private ZoomOutCallback mZoomOutCallback;
     /**
      * This keeps a reference to the child dragged by the user. Even after user stops dragging,
      * until view reaches its final position (end of recover animation), we keep a reference so
@@ -113,6 +115,9 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
     };
     private int mActionState;
 
+    public void setZoomOutCallback(@Nullable ZoomOutCallback callback) {
+        mZoomOutCallback = callback;
+    }
 
     public void attachToRecyclerView(RecyclerView rv) {
         if (mRecyclerView == rv) {
@@ -368,6 +373,11 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .setDuration(0)
                     .start();
+            if (scaleFactorDiff > MAX_SCALE) {
+                if (mZoomOutCallback != null) {
+                    mZoomOutCallback.onZoomOut(mSelected.itemView);
+                }
+            }
         }
     }
 
@@ -414,6 +424,10 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
                     .setDuration(0)
                     .start();
         }
+    }
+
+    public interface ZoomOutCallback {
+        void onZoomOut(View view);
     }
 }
 

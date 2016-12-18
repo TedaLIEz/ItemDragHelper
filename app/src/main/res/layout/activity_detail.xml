@@ -4,11 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_detail"
     android:layout_width="match_parent"
+    android:transitionGroup="true"
     android:layout_height="match_parent"
     tools:context="com.hustunique.jianguo.photogallery.DetailActivity">
     <ImageView
         android:transitionName="profile"
         tools:src="@drawable/hours"
+        android:id="@+id/detail"
         android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

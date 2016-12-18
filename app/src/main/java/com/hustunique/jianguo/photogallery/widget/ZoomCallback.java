@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package com.hustunique.jianguo.photogallery.interpolators;
+package com.hustunique.jianguo.photogallery.widget;
 
-import android.view.animation.Interpolator;
+import android.support.v7.widget.RecyclerView;
+
+import com.hustunique.jianguo.photogallery.adapter.GalleryAdapter;
 
 /**
- * Created by JianGuo on 12/11/16.
+ * Created by JianGuo on 12/18/16.
  */
 @Deprecated
-public class ReverseInterpolator implements Interpolator {
+public class ZoomCallback extends ItemDragHelper.ZoomOutCallback {
+    private final GalleryAdapter mGalleryAdapter;
+
+    public ZoomCallback(GalleryAdapter galleryAdapter) {
+        mGalleryAdapter = galleryAdapter;
+    }
+
     @Override
-    public float getInterpolation(float v) {
-        return Math.abs(v - 1f);
+    public void onZoomOut(RecyclerView.ViewHolder viewHolder) {
+
     }
 }

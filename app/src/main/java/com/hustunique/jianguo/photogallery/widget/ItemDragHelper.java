@@ -8,7 +8,6 @@ import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -338,24 +337,30 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
+            float scaleFactorDiff = detector.getScaleFactor();
+            if (scaleFactorDiff > MAX_SCALE) {
+                if (mZoomOutCallback != null) {
+//                    mZoomOutCallback.onZoomOut(mSelected);
+                    select(null, ACTION_STATE_IDLE);
+                    return false;
+                }
+            }
             if (detector.isInProgress()) {
                 View child = findChildView(detector);
                 if (child != null) {
                     RecyclerView.ViewHolder vh = mRecyclerView.getChildViewHolder(child);
                     if (vh != mSelected) {
-                        if (Float.compare(detector.getScaleFactor(), 1.0f) != 0) {
+                        if (Float.compare(scaleFactorDiff, 1.0f) != 0) {
                             mInitialTouchX = vh.itemView.getX();
                             mInitialTouchY = vh.itemView.getY();
                             mScale = 1.0f;
                             mDx = mDy = 0f;
                             mRotate = 0.0f;
-                            Log.d(TAG, "start scale initialTouchX " + mInitialTouchX
-                                    + " initialTouchY " + mInitialTouchY);
                             select(vh, ACTION_STATE_ANIMATED);
                         }
                     } else {
                         // TODO: 12/13/16 Show full image when scaleFactor big enough
-                        float scaleFactorDiff = detector.getScaleFactor();
+
                         handleScale(scaleFactorDiff);
                     }
                 }
@@ -365,19 +370,17 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
     }
 
     private void handleScale(float scaleFactorDiff) {
+
         if (mSelected != null && scaleFactorDiff >= MIN_SCALE) {
+
             mScale = scaleFactorDiff;
+
             ViewCompat.animate(mSelected.itemView)
                     .scaleX(scaleFactorDiff)
                     .scaleY(scaleFactorDiff)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .setDuration(0)
                     .start();
-            if (scaleFactorDiff > MAX_SCALE) {
-                if (mZoomOutCallback != null) {
-                    mZoomOutCallback.onZoomOut(mSelected.itemView);
-                }
-            }
         }
     }
 
@@ -426,8 +429,8 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
         }
     }
 
-    public interface ZoomOutCallback {
-        void onZoomOut(View view);
+    public static abstract class ZoomOutCallback {
+        public abstract void onZoomOut(RecyclerView.ViewHolder viewHolder);
     }
 }
 

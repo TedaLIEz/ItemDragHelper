@@ -24,7 +24,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import static com.hustunique.jianguo.photogallery.MainActivity.EXTRA_PHOTO_POS;
@@ -39,7 +38,7 @@ public class DetailActivity extends AppCompatActivity {
     private int[] imageIds = {R.drawable.book, R.drawable.bourne, R.drawable.cacw,
             R.drawable.doctor, R.drawable.dory, R.drawable.hours,
             R.drawable.hunger, R.drawable.ipman3, R.drawable.squad, R.drawable.deadpool};
-    private FrameLayout mContentView;
+//    private FrameLayout mContentView;
     private ImageView mImageView;
 
     /**
@@ -57,7 +56,7 @@ public class DetailActivity extends AppCompatActivity {
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+            mImageView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -87,23 +86,17 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_detail);
         mVisible = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            postponeEnterTransition();
-        }
         mImageView = (ImageView) findViewById(R.id.detail);
-        mContentView = (FrameLayout) findViewById(R.id.fullscreen_content);
+//        mContentView = (FrameLayout) findViewById(R.id.fullscreen_content);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            postponeEnterTransition();
+//            mContentView.setTransitionGroup(true);
+        }
         int pos = getIntent().getIntExtra(EXTRA_PHOTO_POS, 0);
         mImageView.setImageResource(imageIds[pos % imageIds.length]);
-//        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        schedulePostponedEnterTransition();
+//        schedulePostponedEnterTransition();
 
     }
 
@@ -154,7 +147,7 @@ public class DetailActivity extends AppCompatActivity {
     @SuppressLint("InlinedApi")
     private void show() {
         // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        mImageView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
 

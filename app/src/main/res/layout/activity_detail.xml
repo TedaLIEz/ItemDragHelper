@@ -19,12 +19,8 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:fitsSystemWindows="true"
+             android:background="@android:color/black"
              tools:context="com.hustunique.jianguo.photogallery.DetailActivity">
-    <FrameLayout
-        android:background="@android:color/black"
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
         <ImageView
             android:transitionName="profile"
             tools:src="@drawable/hours"
@@ -34,7 +30,6 @@
             android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </FrameLayout>
 
 
 </FrameLayout>

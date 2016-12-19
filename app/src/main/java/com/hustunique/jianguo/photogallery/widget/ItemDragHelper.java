@@ -31,7 +31,7 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
     private static final int ACTION_STATE_ANIMATED = 1;
     private static final long DEFAULT_ANIMATION_DURATION = 100;
     private static final float MIN_SCALE = 0.4f;
-    private static final float MAX_SCALE = 3f;
+    private static final float MAX_SCALE = 2f;
     RecyclerView.ViewHolder mSelected;
     private float mInitialTouchX;
     private float mInitialTouchY;
@@ -99,6 +99,10 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
                 case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_POINTER_UP:
+                    if (mScaled != null && mZoomOutCallback != null && mScale > MAX_SCALE) {
+                        mZoomOutCallback.onZoomOut(mScaled);
+                        mScaled = null;
+                    }
                     select(null, ACTION_STATE_IDLE);
                     break;
             }
@@ -113,6 +117,7 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
         }
     };
     private int mActionState;
+    private RecyclerView.ViewHolder mScaled = null;
 
     public void setZoomOutCallback(@Nullable ZoomOutCallback callback) {
         mZoomOutCallback = callback;
@@ -341,10 +346,8 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
             if (scaleFactorDiff > MAX_SCALE) {
                 if (mZoomOutCallback != null) {
                     if (mSelected != null) {
-                        mZoomOutCallback.onZoomOut(mSelected);
-                        select(null, ACTION_STATE_IDLE);
+                        mScaled = mSelected;
                     }
-                    return false;
                 }
             }
             if (detector.isInProgress()) {

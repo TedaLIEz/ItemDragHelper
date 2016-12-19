@@ -340,8 +340,10 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
             float scaleFactorDiff = detector.getScaleFactor();
             if (scaleFactorDiff > MAX_SCALE) {
                 if (mZoomOutCallback != null) {
-//                    mZoomOutCallback.onZoomOut(mSelected);
-                    select(null, ACTION_STATE_IDLE);
+                    if (mSelected != null) {
+                        mZoomOutCallback.onZoomOut(mSelected);
+                        select(null, ACTION_STATE_IDLE);
+                    }
                     return false;
                 }
             }

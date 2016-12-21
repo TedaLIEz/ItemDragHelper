@@ -1,40 +1,38 @@
 package com.hustunique.jianguo.photogallery.model;
 
-import android.graphics.Matrix;
 import android.support.annotation.FloatRange;
 
 /**
  * Created by JianGuo on 12/11/16.
  */
-@Deprecated
 public class Layer {
     /**
-     * rotation relative to the view center
+     * rotation relative to the layer center, in degrees
      */
     @FloatRange(from = 0.0F, to = 360.0F)
     private float rotationInDegrees;
 
     private float scale;
     /**
-     * top left X coordinate, relative to parent
+     * top left X coordinate, relative to parent canvas
      */
     private float x;
     /**
-     * top left Y coordinate, relative to parent
+     * top left Y coordinate, relative to parent canvas
      */
     private float y;
-
+    /**
+     * is layer flipped horizontally (by X-coordinate)
+     */
     private boolean isFlipped;
-    private final int width, height;
 
-    public Layer(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public Layer() {
+        reset();
     }
 
-    public void reset() {
+    protected void reset() {
         this.rotationInDegrees = 0.0F;
-        this.scale = 1.0f;
+        this.scale = 1.0F;
         this.isFlipped = false;
         this.x = 0.0F;
         this.y = 0.0F;
@@ -114,29 +112,9 @@ public class Layer {
     }
 
     interface Limits {
-        float MIN_SCALE = 0.5F;
+        float MIN_SCALE = 0.06F;
         float MAX_SCALE = 4.0F;
         float INITIAL_ENTITY_SCALE = 0.4F;
-    }
-
-    public Matrix getMatrix() {
-        Matrix matrix = new Matrix();
-        float topLeftX = getX() * width;
-        float topLeftY = getY() * height;
-        float centerX = topLeftX + width * 0.5F;
-        float centerY = topLeftY + height * 0.5F;
-        float rotationInDegree = getRotationInDegrees();
-        float scaleX = getScale();
-        float scaleY = getScale();
-        if (isFlipped()) {
-            rotationInDegree *= -1.0F;
-            scaleX *= -1.0F;
-        }
-        matrix.preScale(scaleX, scaleY, centerX, centerY);
-        matrix.preRotate(rotationInDegree, centerX, centerY);
-        matrix.preTranslate(topLeftX, topLeftY);
-//        matrix.preScale(holyScale, holyScale);
-        return matrix;
     }
 
 }

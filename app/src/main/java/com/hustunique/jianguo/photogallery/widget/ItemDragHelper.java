@@ -379,7 +379,9 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
         if (mSelected != null && scaleFactorDiff >= MIN_SCALE) {
 
             mScale = scaleFactorDiff;
-
+            if (mZoomOutCallback != null) {
+                mZoomOutCallback.onScaleOut(mScale);
+            }
             ViewCompat.animate(mSelected.itemView)
                     .scaleX(scaleFactorDiff)
                     .scaleY(scaleFactorDiff)
@@ -436,6 +438,7 @@ public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeList
 
     public static abstract class ZoomOutCallback {
         public abstract void onZoomOut(RecyclerView.ViewHolder viewHolder);
+        public abstract void onScaleOut(float scale);
     }
 }
 

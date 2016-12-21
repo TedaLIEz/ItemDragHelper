@@ -16,10 +16,7 @@
 
 package com.hustunique.jianguo.photogallery;
 
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -31,7 +28,6 @@ import com.hustunique.jianguo.photogallery.widget.ItemDragHelper;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
-    static final String EXTRA_PHOTO_POS = "EXTRA_PHOTO_POS";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,17 +41,15 @@ public class MainActivity extends AppCompatActivity {
         GalleryAdapter galleryAdapter = new GalleryAdapter(this);
         mRecyclerView.setAdapter(galleryAdapter);
         ItemDragHelper dragItemHelper = new ItemDragHelper();
-        // TODO: zoom out to show pic
         dragItemHelper.setZoomOutCallback(new ItemDragHelper.ZoomOutCallback() {
             @Override
             public void onZoomOut(RecyclerView.ViewHolder viewHolder) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    viewHolder.itemView.setTransitionName("profile");
-                    Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-                    intent.putExtra(EXTRA_PHOTO_POS, viewHolder.getAdapterPosition());
-                    startActivity(intent, ActivityOptionsCompat
-                            .makeSceneTransitionAnimation(MainActivity.this, viewHolder.itemView, viewHolder.itemView.getTransitionName()).toBundle());
-                }
+                // TODO: Zoom out to show pic in this activity
+            }
+
+            @Override
+            public void onScaleOut(float scale) {
+                // TODO: change background color in whole screen
             }
         });
         dragItemHelper.attachToRecyclerView(mRecyclerView);

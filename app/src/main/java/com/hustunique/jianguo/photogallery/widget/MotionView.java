@@ -17,10 +17,14 @@
 package com.hustunique.jianguo.photogallery.widget;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Build;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -34,7 +38,9 @@ import android.widget.FrameLayout;
 
 import com.almeros.android.multitouch.MoveGestureDetector;
 import com.almeros.android.multitouch.RotateGestureDetector;
+import com.hustunique.jianguo.photogallery.entity.ImageEntity;
 import com.hustunique.jianguo.photogallery.entity.MotionEntity;
+import com.hustunique.jianguo.photogallery.model.Layer;
 
 /**
  * Created by JianGuo on 12/21/16.
@@ -42,9 +48,10 @@ import com.hustunique.jianguo.photogallery.entity.MotionEntity;
 
 public class MotionView extends FrameLayout {
     private static final float DOUBLE_SCALE_DIFF = 1.5F;
+    private static final String TAG = "MotionView";
     private MotionEntity mEntity;
 
-
+    private float mColorScaleDiff;
     private ScaleGestureDetector mScaleGestureDetector;
     private RotateGestureDetector mRotateGestureDetector;
     private MoveGestureDetector mMoveGestureDetector;
@@ -65,6 +72,19 @@ public class MotionView extends FrameLayout {
         init(context);
     }
 
+    public void setEntityAndPosition(@DrawableRes final int id) {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), id);
+                Layer layer = new Layer();
+                ImageEntity entity = new ImageEntity(layer, bitmap,
+                        getWidth(), getHeight());
+                setEntityAndPosition(entity);
+            }
+        });
+    }
+
     private void init(@NonNull Context context) {
         setWillNotDraw(false);
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
@@ -79,7 +99,7 @@ public class MotionView extends FrameLayout {
         updateUI();
     }
 
-    public void setEntityAndPosition(@Nullable MotionEntity entity) {
+    private void setEntityAndPosition(@Nullable MotionEntity entity) {
         if (entity != null) {
             initialTranslateAndScale(entity);
             setEntity(entity);
@@ -126,10 +146,12 @@ public class MotionView extends FrameLayout {
         public boolean onTouch(View v, MotionEvent event) {
             if (findEntityAtPoint(event.getX(), event.getY())) {
                 if (mScaleGestureDetector != null) {
-                    mScaleGestureDetector.onTouchEvent(event);
-                    mRotateGestureDetector.onTouchEvent(event);
                     mMoveGestureDetector.onTouchEvent(event);
                     mGestureDetectorCompat.onTouchEvent(event);
+                    if (event.getPointerCount() >= 2) {
+                        mScaleGestureDetector.onTouchEvent(event);
+                        mRotateGestureDetector.onTouchEvent(event);
+                    }
                 }
             }
             return true;
@@ -187,7 +209,12 @@ public class MotionView extends FrameLayout {
 
     private void handleScale(float scaleFactorDiff) {
         if (mEntity != null) {
-            mEntity.getLayer().postScale(scaleFactorDiff - 1.0f);
+            float diff = scaleFactorDiff - 1.0f;
+            mColorScaleDiff += diff * 5;
+            mEntity.getLayer().postScale(diff);
+            float ratio = (float) Math.min(1.0f, Math.max(0, 1.0 - mColorScaleDiff));
+            int color = Math.abs((int) (ratio * 255));
+            setBackgroundColor(Color.argb(255, color, color, color));
             updateUI();
         }
     }

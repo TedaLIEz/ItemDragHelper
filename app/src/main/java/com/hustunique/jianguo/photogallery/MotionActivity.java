@@ -16,13 +16,9 @@
 
 package com.hustunique.jianguo.photogallery;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.hustunique.jianguo.photogallery.entity.ImageEntity;
-import com.hustunique.jianguo.photogallery.model.Layer;
 import com.hustunique.jianguo.photogallery.widget.MotionView;
 
 public class MotionActivity extends AppCompatActivity {
@@ -32,15 +28,6 @@ public class MotionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_motion);
         mMotionView = (MotionView) findViewById(R.id.motion_view);
-        mMotionView.post(new Runnable() {
-            @Override
-            public void run() {
-                Layer layer = new Layer();
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.hours);
-                ImageEntity entity = new ImageEntity(layer, bitmap,
-                        mMotionView.getWidth(), mMotionView.getHeight());
-                mMotionView.setEntityAndPosition(entity);
-            }
-        });
+        mMotionView.setEntityAndPosition(R.drawable.hours);
     }
 }

@@ -22,8 +22,7 @@ import java.util.List;
 
 /**
  * Created by JianGuo on 12/9/16.
- * DragHelper, much similar to the {@link ItemTouchHelper}, only support for {@link android.widget.ImageView}
- * currently
+ * DragHelper, much similar to the {@link ItemTouchHelper}
  */
 public class ItemDragHelper implements RecyclerView.OnChildAttachStateChangeListener {
     private static final String TAG = "ItemDragHelper";
